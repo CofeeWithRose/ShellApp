@@ -1,0 +1,23 @@
+import React from 'react'
+import * as  ReactDOM from 'react-dom'
+import './index.css';
+import App from './layout/App/App'
+import { Provider } from 'mobx-react';
+import { stores } from './stores';
+import { Router, Route } from 'react-router'
+import {createHashHistory} from 'history'
+import  Login from './layout/Login'
+
+const hashHistory = createHashHistory()
+
+ReactDOM.render(
+    <Provider {...stores} >
+        <Router history={hashHistory} >
+            <Route path="/404" component={App}/>
+            <Route path='/login' component={Login}/>
+        </Router>
+    </Provider>
+    , document.getElementById('root'));
+
+
+
