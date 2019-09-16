@@ -51,7 +51,7 @@ async function loadCss( config:InitModuleConfig, path: string){
 
 
 async function getResourcesPath(servePath:string):Promise<{ type:'css'| 'script', path:string }[]> {
-    const rsp = await fetch(servePath)
+    const rsp = await fetch(`${servePath}?_=${Date.now()}`)
     const content = await rsp.text();
     return (content.match(/<(script|link)[^>]+src="[^"]+(.js|.css)/g)||[]).map( (path) => {
         path = (path.match(/"[^"]+(.js|.css)/) as string[])[0];
@@ -78,7 +78,6 @@ export async function initModules(): Promise<RouteInfo[]> {
     const configs: InitModuleConfig[] = initModulesConfig;
     let routes:RouteInfo[] = [];
     const moduleState:Map<string, () =>void> = new Map();
-    debugger
     ShellApp.registModule = function(namespace:string, routeInfo: RouteInfo[]){
         const resolveFun = moduleState.get(namespace)
         if(resolveFun){
