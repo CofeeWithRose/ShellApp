@@ -1,0 +1,2 @@
+var module2=(window.webpackJsonpmodule2=window.webpackJsonpmodule2||[]).push([[0],[function(n,o,e){n.exports=e(1)},function(n,o,e){"use strict";function u(){window.ShellApp&&window.ShellApp.registModule("module2",[{routePath:"/module2",component:function(){return e.e(2).then(e.bind(null,2))}}])}e.r(o),e.d(o,"init",function(){return u}),u()}],[[0,1]]]);
+//# sourceMappingURL=main.4f759130.chunk.js.map

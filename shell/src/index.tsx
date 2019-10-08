@@ -15,7 +15,7 @@ function initApp(routeInfos:RouteInfo[]) {
     const hashHistory = createHashHistory()
     ReactDOM.render(
         <Provider {...stores} >
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<Loading/>}>
                 <Router history={hashHistory} >
                     {
                         routeInfos.map(({ routePath, component }) => <Route key={routePath} path={routePath} component={React.lazy(component)} />)

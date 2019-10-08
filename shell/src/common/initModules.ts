@@ -29,7 +29,11 @@ function resolevePath( servePath: string, path:string):string {
    throw new Error(`can not resoleve ${path}`)
 }
 
-async function loadScript(resolveFun: () => void, config:InitModuleConfig, path: string){
+async function loadScript(resolveFun: () => void, config:InitModuleConfig, path?: string){
+    if(!path) {
+        resolveFun()
+        return
+    } 
     const script = document.createElement('script')
     const { namespace, servePath } = config
     
@@ -41,7 +45,8 @@ async function loadScript(resolveFun: () => void, config:InitModuleConfig, path:
     document.body.appendChild(script)
 }
 
-async function loadCss( config:InitModuleConfig, path: string){
+async function loadCss( config:InitModuleConfig, path?: string){
+    if(!path) return
     const css = document.createElement('link')
     css.href = resolevePath(config.servePath, path)
     css.rel = 'stylesheet'
@@ -50,31 +55,24 @@ async function loadCss( config:InitModuleConfig, path: string){
 }
 
 
-async function getResourcesPath(servePath:string):Promise<{ type:'css'| 'script', path:string }[]> {
-    const rsp = await fetch(`${servePath}?_=${Date.now()}`)
-    const content = await rsp.text();
-    return (content.match(/<(script|link)[^>]+src="[^"]+(.js|.css)/g)||[]).map( (path) => {
-        path = (path.match(/"[^"]+(.js|.css)/) as string[])[0];
-        path = path.substring(1, path.length)
-        return /js$/.test(path)? { type:'script', path } : { type:'css', path }
-    })
-    
-}
 
 function initModule(config:InitModuleConfig, moduleState: Map<string,() => void>){
-    console.log('initModule', config.namespace)
     return new Promise( async resolve =>{
         const { namespace, servePath } = config
         moduleState.set(namespace, resolve)
-        const paths = await  getResourcesPath(servePath)
-        paths.forEach( ({ type, path }) => {
-            type=== 'script'? loadScript(resolve, config, path) : loadCss(config, path)
-        })
+        const rsp = await fetch(`${servePath}/asset-manifest.json?_=${Date.now()}`)
+        const manifestJson = await rsp.json()
+        const files = manifestJson['files']
+        const runTimePath = files['runtime~main.js']
+        const mainPath = files['main.js']
+        const cssPath = files['main.css']
+        loadScript(resolve, config, runTimePath)
+        loadScript(resolve, config, mainPath)
+        loadCss(config, cssPath)
     })
 }
 
 export async function initModules(): Promise<RouteInfo[]> {
-    console.log('initmodule')
     const configs: InitModuleConfig[] = initModulesConfig;
     let routes:RouteInfo[] = [];
     const moduleState:Map<string, () =>void> = new Map();
